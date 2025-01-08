@@ -1,0 +1,40 @@
+from dependency_parser_canevas_salome import read_treebank, compute_evaluation, ArcEager, HyperParameters
+import yaml
+from copy import deepcopy
+
+DERIVATIONS = [
+    [('RA', 'root')],
+    [('SH', None), ('LA', 'det'), ('SH', None), ('SH', None), ('LA', 'a_obj'), ('LA', 'suj'), ('RA', 'root'), ('RA', 'obj'), ('SH', None), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('RA', 'obj.p'), ('SH', None), ('SH', None), ('RA', 'obj.p'), ('SH', None), ('SH', None), ('SH', None), ('LA', 'mod'), ('RA', 'obj.p'), ('SH', None), ('SH', None), ('LA', 'det'), ('SH', None), ('RA', 'mod'), ('RE', None), ('LA', 'suj'), ('LA', 'ponct'), ('RE', None), ('LA', 'mod'), ('LA', 'ponct'), ('RE', None), ('LA', 'mod'), ('LA', 'ponct'), ('RE', None), ('LA', 'mod'), ('RA', 'obj.cpl'), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('SH', None), ('LA', 'mod'), ('SH', None), ('SH', None), ('LA', 'mod'), ('RA', 'obj.p'), ('RA', 'dep'), ('SH', None), ('LA', 'suj'), ('RA', 'obj.cpl'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('SH', None), ('SH', None), ('RA', 'mod'), ('RE', None), ('LA', 'suj'), ('LA', 'ponct'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('LA', 'mod'), ('RA', 'root'), ('RA', 'mod'), ('RA', 'obj.p'), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('RE', None), ('RE', None), ('RA', 'obj'), ('RE', None), ('RA', 'mod'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RA', 'mod'), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('SH', None), ('SH', None), ('SH', None), ('LA', 'aux.pass'), ('LA', 'ponct'), ('LA', 'mod'), ('RA', 'root'), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('RA', 'suj'), ('RE', None), ('RA', 'p_obj.o'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RA', 'p_obj.o'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('SH', None), ('RA', 'obj.p'), ('SH', None), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('SH', None), ('RA', 'coord'), ('RA', 'dep.coord'), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('LA', 'suj'), ('LA', 'ponct'), ('RE', None), ('LA', 'mod'), ('RA', 'root'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RA', 'coord'), ('SH', None), ('RA', 'mod'), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RA', 'mod.app'), ('RA', 'mod'), ('RE', None), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RA', 'mod'), ('RA', 'mod'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RA', 'dep'), ('RA', 'obj.p'), ('RA', 'mod'), ('SH', None), ('LA', 'ponct'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('LA', 'suj'), ('RA', 'dep.coord'), ('RA', 'p_obj.o'), ('RA', 'obj.p'), ('RA', 'ponct'), ('SH', None), ('LA', 'suj'), ('RE', None), ('RA', 'mod.rel'), ('RA', 'obj'), ('RA', 'coord'), ('RA', 'dep.coord'), ('RE', None), ('RE', None), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RA', 'coord'), ('RA', 'dep.coord'), ('RA', 'obj.p'), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct'), ('SH', None), ('LA', 'det'), ('RE', None), ('RA', 'obj'), ('SH', None), ('LA', 'suj'), ('RA', 'mod.rel'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RE', None), ('RA', 'mod'), ('SH', None), ('LA', 'mod'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('SH', None), ('RA', 'obj.p'), ('SH', None), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('SH', None), ('SH', None), ('LA', 'aux.pass'), ('LA', 'suj'), ('LA', 'ponct'), ('RE', None), ('LA', 'mod'), ('RA', 'root'), ('RA', 'ponct'), ('SH', None), ('LA', 'mod'), ('RE', None), ('RA', 'mod'), ('RA', 'obj.p'), ('RE', None), ('RA', 'ponct'), ('RE', None), ('RA', 'coord'), ('RA', 'mod'), ('RE', None), ('RA', 'dep.coord'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('RA', 'root'), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p')],
+    [('SH', None), ('LA', 'det'), ('SH', None), ('SH', None), ('LA', 'aux.tps'), ('LA', 'suj'), ('RA', 'root'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RA', 'a_obj'), ('RA', 'obj.p'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RA', 'dep'), ('RA', 'obj.p'), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RE', None), ('RA', 'coord'), ('RA', 'dep.coord'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('SH', None), ('SH', None), ('LA', 'aux.tps'), ('LA', 'suj'), ('RA', 'root'), ('RA', 'obj'), ('SH', None), ('LA', 'det'), ('SH', None), ('SH', None), ('LA', 'aux.tps'), ('LA', 'suj'), ('RA', 'obj.cpl'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RE', None), ('RA', 'mod'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RE', None), ('RA', 'coord'), ('RA', 'dep.coord'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'coord'), ('RA', 'dep.coord'), ('SH', None), ('LA', 'suj'), ('RA', 'obj.cpl'), ('RA', 'obj'), ('RA', 'obj.p'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RA', 'mod'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')],
+    [('SH', None), ('LA', 'det'), ('SH', None), ('RA', 'dep'), ('SH', None), ('LA', 'det'), ('RA', 'obj.p'), ('RA', 'mod'), ('RE', None), ('RE', None), ('RE', None), ('LA', 'suj'), ('RA', 'root'), ('RA', 'ats'), ('SH', None), ('LA', 'det'), ('RA', 'ats'), ('SH', None), ('SH', None), ('LA', 'mod'), ('LA', 'det'), ('RA', 'mod'), ('RA', 'mod'), ('RA', 'obj.p'), ('SH', None), ('LA', 'det'), ('RA', 'obj'), ('RA', 'dep'), ('RA', 'obj.p'), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RE', None), ('RA', 'ponct')]
+]
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Test script for the ArcEager class')
+    parser.add_argument('config',nargs ='?',default=r'C:\Users\nikyt\Documents\IDL M2\Syntaxe et Sémantique\TD5_projet_parsing-20241016\config.yaml', help='Path to yaml config file')
+    args = parser.parse_args()
+    
+    with open(args.config) as instream:
+        hp = HyperParameters(yaml.load(instream, Loader=yaml.SafeLoader))
+
+    # treebank = list of DependencyTree objects
+    treebank = read_treebank(hp.treebank)
+
+    treebank = treebank[:10]
+    
+    
+    for i, tree in enumerate(treebank):
+        derivation = DERIVATIONS[i]
+        state = ArcEager(tree.get_tokens())
+        for transition in derivation:
+            state.do_action(*transition)
+        
+        pred_tree = state.get_tree()
+        print(compute_evaluation([tree], [pred_tree]))
